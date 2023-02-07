@@ -1,6 +1,8 @@
 package com.ex.con_room;
 
 import java.util.Date;
+import java.util.List;
+
 
 public class Bookings {
 	private String title;
@@ -8,6 +10,16 @@ public class Bookings {
 	private Date end;
 	private int eid;
 	private long roomId;
+	private int eids[];
+
+	
+	public int[] getEids() {
+		return eids;
+	}
+
+	public void setEids(int[] eids) {
+		this.eids = eids;
+	}
 
 	public String getTitle() {
 		return title;

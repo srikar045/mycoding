@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.ex.con_room.Booking;
 import com.ex.con_room.Bookings;
+import com.ex.models.Employee;
 
 @Service
 public interface BookingService {
@@ -18,9 +19,9 @@ public interface BookingService {
 	public void delid(long bid);
 	public List<Booking> showall();
 	public Booking onebook(long bid);
-	
-	public Booking updateTitle(long id,Booking booking);
-	public Booking updateTime(long id,Booking booking);
+	public List<Booking> mybook(int emp);
+	public Booking updateTitle(long id,Bookings booking);
+	public Booking updateTime(long id,Bookings booking);
 	
 		
 }

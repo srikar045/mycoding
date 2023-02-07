@@ -20,64 +20,76 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ex.con_room.Booking;
 import com.ex.con_room.Bookings;
 import com.ex.exceptions.ResourceNotFoundException;
+import com.ex.models.Employee;
 import com.ex.service.BookingService;
 
-@CrossOrigin(origins="http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class BookingController {
-	
+
 	@Autowired
 	BookingService service;
-	
+
 	@PostMapping("/book")
-	@PreAuthorize("hasRole('Admin')")
-	public ResponseEntity<String>saveBook(@RequestBody Bookings booking){
-		boolean run=service.savebook(booking);
-		if(run==true) {
-			return new ResponseEntity<String>("Booked", HttpStatus.OK);
-		}else {
-			return new ResponseEntity<String>("Something went Wrong",HttpStatus.IM_USED);
+//	@PreAuthorize("hasRole('Admin')")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	public ResponseEntity<String> saveBook(@RequestBody Bookings booking) {
+		boolean run = service.savebook(booking);
+		if (run == true) {
+			return ResponseEntity.ok("Booked");
+		} else {
+			return new ResponseEntity("Change Start or End TIME to continue", HttpStatus.IM_USED);
 		}
 	}
 
 	@GetMapping("/getbook")
-	@PreAuthorize("hasRole('Admin')")
-	public  ResponseEntity<List<Booking>>get(){
-		List<Booking> list=service.showall();
-		return new ResponseEntity(list,HttpStatus.OK);
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager','Employee')")
+	public ResponseEntity<List<Booking>> get() {
+		List<Booking> list = service.showall();
+		return new ResponseEntity(list, HttpStatus.OK);
 	}
-	
+
+	@GetMapping("/getmybook/{eid}")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	public ResponseEntity<List<Booking>> getmy(@PathVariable int eid) {
+		List<Booking> list = service.mybook(eid);
+		return new ResponseEntity(list, HttpStatus.OK);
+	}
+
 	@GetMapping("/getbook/{id}")
 	@PreAuthorize("hasRole('Admin')")
-	public ResponseEntity<Booking>getById(@PathVariable long id){
-		Booking data= service.onebook(id);
-		return new ResponseEntity(data,HttpStatus.OK);
+	public ResponseEntity<Booking> getById(@PathVariable long id) {
+		Booking data = service.onebook(id);
+		return new ResponseEntity(data, HttpStatus.OK);
 	}
-	
+
 	@PutMapping("/putbook/{id}")
-	@PreAuthorize("hasRole('Admin')")
-	public ResponseEntity<Booking> update(@PathVariable long id,@RequestBody Booking booking){
-		Booking bookings=service.updateTitle(id, booking);
-		if(booking!=null) {
-			return  new ResponseEntity(bookings,HttpStatus.OK); 
+//	@PreAuthorize("hasRole('Admin')")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	public ResponseEntity<Booking> update(@PathVariable long id, @RequestBody Bookings booking) {
+		Booking bookings = service.updateTitle(id, booking);
+		if (booking != null) {
+			return new ResponseEntity(bookings, HttpStatus.OK);
 		}
-		return  new ResponseEntity(null,HttpStatus.NOT_FOUND);
+		return new ResponseEntity(null, HttpStatus.NOT_FOUND);
 	}
-	
+
 	@PutMapping("/puttime/{id}")
-	@PreAuthorize("hasRole('Admin')")
-	public ResponseEntity<Booking> updateT(@PathVariable long id,@RequestBody Booking booking){
-		Booking bookings=service.updateTime(id, booking);
-		if(bookings!=null) {
-			return  new ResponseEntity(bookings,HttpStatus.OK); 
+//	@PreAuthorize("hasRole('Admin')")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	public ResponseEntity<Booking> updateT(@PathVariable long id, @RequestBody Bookings booking) {
+		Booking bookings = service.updateTime(id, booking);
+		if (bookings != null) {
+			return new ResponseEntity(bookings, HttpStatus.OK);
 		}
-		return  new ResponseEntity(null,HttpStatus.NOT_FOUND);
+		return new ResponseEntity("Time slot NOT Avaliable", HttpStatus.NOT_FOUND);
 	}
-	
+
 	@DeleteMapping("/del/{id}")
-	@PreAuthorize("hasRole('Admin')")
-	public ResponseEntity<String>deleteBook(@PathVariable long id){
+//	@PreAuthorize("hasRole('Admin')")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	public ResponseEntity<String> deleteBook(@PathVariable long id) {
 		service.delid(id);
-		return new ResponseEntity<String>("deleted data",HttpStatus.ACCEPTED);
+		return new ResponseEntity<String>("deleted data", HttpStatus.ACCEPTED);
 	}
 }

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ex.con_room.Con_room;
+import com.ex.exceptions.BadRequestException;
+import com.ex.exceptions.UsedException;
 import com.ex.repository.RoomRepo;
 
 @Service
@@ -19,7 +21,18 @@ public class ServiceRoomImpl implements RoomService{
 	
 	@Override
 	public Con_room save(Con_room room) {
+		if(room.getName().isEmpty()) {
+			throw new BadRequestException("Room name can't be empty"); 
+		}
 		Con_room aaa=roomRepo.findByName(room.getName());
+		String rname1=room.getName();
+		List<Con_room> con=roomRepo.findAll();
+		for(int i=0;i<con.size();i++) {
+			String rname2=con.get(i).getName();
+			if(rname1.equals(rname2)) {
+				throw new UsedException("Room name Already Exits");
+			}
+		}
 		if(aaa==null) {
 		Con_room data=room;
 		
@@ -29,8 +42,11 @@ public class ServiceRoomImpl implements RoomService{
 		data.setUpdated_on(null);
 		return roomRepo.save(data);
 		}else {
-			return null;
+			if(room.getName().isEmpty()) {
+				throw new BadRequestException("Room name already exists"); 
+			}
 		}
+		return null;
 	}
 
 	@Override

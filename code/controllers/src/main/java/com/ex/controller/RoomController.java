@@ -40,7 +40,7 @@ public class RoomController {
 
 	@GetMapping("/Rget")
 	@ResponseBody
-	@PreAuthorize("hasAnyRole('Admin','Lead','Manager')")
+	@PreAuthorize("hasAnyRole('Admin','Lead','Manager','Employee')")
 	public List<Con_room> findAll() {
 		List<Con_room> room = service.getAll();
 		return room;

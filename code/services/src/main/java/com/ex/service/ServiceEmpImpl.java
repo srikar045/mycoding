@@ -6,10 +6,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +35,12 @@ public class ServiceEmpImpl implements EmpService {
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private JavaMailSender mailSenderObj;
 
 	public boolean saveEmp(Employee emp) {
+		String pass=emp.getPassword();
 		Employee empusername = empRepo.findByUsername(emp.getUsername());
 		Optional<Employee> empmail = empRepo.findByEmail(emp.getEmail());
 		if (empmail.isPresent() || empusername != null) {
@@ -50,12 +59,41 @@ public class ServiceEmpImpl implements EmpService {
 			Emp.setCreated_on(date);
 			Emp.setUpdated_by(null);
 			Emp.setUpdated_on(null);
-			empRepo.save(Emp);
+			Employee eee=empRepo.save(Emp);
+
+			sendmail(emp,eee.getEid(),pass);
 			return true;
 		}
 
 	}
+    private void sendmail(Employee employee,int id,String pass) {
+        final String emailToRecipient = employee.getEmail();
+        final String emailSubject = "Registration Successfull";
+        final String emailMessage1 = "<html> <body> <p>You have been Successfully Registred" + "<br><br>"
+                + " <h2>Registration details</h2>"
+                + "<table border='1' width='300px' style='text-align:center;font-size:20px;'>"
+                + "<tr><td>User ID</td><td>" + id + "</td></tr>"
+                + "<tr><td>User Name</td><td>" + employee.getUsername() + "</td></tr><tr><td>Password</td><td>"
+                + pass + "</td></tr><tr><td>Gender</td><td>" + employee.getGender()
+                + "</td></tr><tr><td>Mobile</td><td>" + employee.getMobile() + "</table>"
+                + "<p>Login to Your Account Using your Username and Password</p>" + "<br>" + "<p>Thanks and regards</p>"
+                + "</p>" + "<p>Stratapps Solutions Pvt Ltd</body></html>";
+        mailSenderObj.send(new MimeMessagePreparator() {
+			
+            @Override
+            public void prepare(MimeMessage mimeMessage) throws Exception {
 
+                MimeMessageHelper mimeMsgHelperObj = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+                mimeMsgHelperObj.setTo(emailToRecipient);
+                mimeMsgHelperObj.setText(emailMessage1, true);
+
+                mimeMsgHelperObj.setSubject(emailSubject);
+
+            }
+        });
+
+    }
 	public List<Employee> getAll() {
 
 		return empRepo.findAll();
@@ -86,7 +124,7 @@ public class ServiceEmpImpl implements EmpService {
 			emp.setEmail(Emp.getEmail());
 			emp.setMobile(Emp.getMobile());
 			emp.setUsername(Emp.getUsername());
-			emp.setPassword((Emp.getPassword()));
+			emp.setPassword((emp.getPassword()));
 			emp.setRole(Emp.getRole());
 			emp.setUpdated_by("SUPER_ADMIN");
 			emp.setUpdated_on(date);

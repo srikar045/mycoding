@@ -3,6 +3,8 @@ package com.ex.controller;
 import java.awt.print.Printable;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +27,7 @@ public class JwtController {
         return jwtService.createJwtToken(jwtRequest);
     	}catch(Exception ex){
     			System.out.println(ex);
-    			return null;
+    			 throw new UsernameNotFoundException("User not found with username: " + jwtRequest.getUserName());
     	}
     	}
 }
